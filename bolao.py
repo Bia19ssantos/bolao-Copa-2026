@@ -8,14 +8,13 @@ st.set_page_config(page_title="Bolão da Família - Rumo ao Hexa!", page_icon="�
 
 LINK_DA_PLANILHA = "https://docs.google.com/spreadsheets/d/1Z2I9Uu0wZvyDb4Fqyo-qgPKE8y4ga4279aj-VYfuXb0/edit?usp=sharing"
 
-# ==================== DADOS DO SEU FORMS CONFIGURADOS ====================
+# ==================== ATENÇÃO: ATUALIZE ESSES NÚMEROS SE SEU NOVO FORMS NÃO SALVAR ====================
 URL_FORM_POST = "https://docs.google.com/forms/d/e/1FAIpQLSe-pFE2N7hUNuJZf8rWXZMrlVkeDULySNF1LSQDUTNepOEJqw/formResponse"
-ENTRY_NOME = "entry.1221199580"    # Pergunta: Participante
-ENTRY_JOGO = "entry.1843232675"    # Pergunta: Jogo
-ENTRY_PALPITE = "entry.880496180"   # Pergunta: Palpite
-# =========================================================================
+ENTRY_NOME = "entry.1221199580"    
+ENTRY_JOGO = "entry.1843232675"    
+ENTRY_PALPITE = "entry.880496180"   
+# ======================================================================================================
 
-# Ajuste de Fuso Horário de Brasília (UTC-3) nativo
 fuso_br = timezone(timedelta(hours=-3))
 agora_br = datetime.now(fuso_br)
 
@@ -69,7 +68,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. FUNÇÃO PARA LER OS JOGOS DA PLANILHA (Forçando tempo real)
+# 2. FUNÇÃO PARA LER OS JOGOS DA PLANILHA
 def carregar_jogos():
     try:
         import time
@@ -98,26 +97,23 @@ def carregar_jogos():
     except:
         return {}
 
-# 3. FUNÇÃO PARA CARREGAR OS PALPITES REAIS GRAVADOS NA PLANILHA (Atualizado para Form_Responses)
+# 3. FUNÇÃO PARA CARREGAR OS PALPITES REAIS
 def carregar_palpites():
     try:
         import time
-        # Alterado aqui para ler a aba 'Form_Responses' da imagem image_7829f8.png
         url = LINK_DA_PLANILHA.replace('/edit?usp=sharing', f'/gviz/tq?tqx=out:csv&sheet=Form_Responses&nocache={time.time()}')
         df = pd.read_csv(url)
         df.columns = [str(col).strip() for col in df.columns]
         
-        # Remove duplicados mantendo sempre a última alteração que o usuário fez para aquele jogo
+        df = df.dropna(subset=['Participante', 'Jogo', 'Palpite'])
         df = df.drop_duplicates(subset=['Participante', 'Jogo'], keep='last')
         
         lista_palpites = []
         for _, row in df.iterrows():
-            if pd.isna(row['Participante']) or pd.isna(row['Jogo']):
-                continue
             lista_palpites.append({
                 "Participante": str(row['Participante']).strip(),
                 "Jogo": str(row['Jogo']).strip(),
-                "Palpite": str(row['Palpite']).strip()
+                "Palpite": str(row['Palpite']).strip().upper().replace(" ", "") # Remove espaços ("0X1")
             })
         return lista_palpites
     except:
@@ -146,10 +142,8 @@ with tab1:
     """, unsafe_allow_html=True)
 
     st.subheader("✍️ Escolha um jogo para palpitar")
-    
     nome = st.selectbox("Quem está jogando?", ["Selecione seu nome..."] + participantes_lista)
     
-    # Filtra apenas partidas que ainda não começaram e não foram marcadas como encerradas
     jogos_disponiveis = {k: v for k, v in st.session_state.jogos.items() if agora_br < v["data_completa"] and not v["encerrado"]}
     
     if not jogos_disponiveis:
@@ -171,15 +165,16 @@ with tab1:
                 gols_2 = st.number_input(f"Gols: {dados_jogo['confronto'].split(' X ')[1]}", min_value=0, value=0, step=1, key="g2")
                 
             if st.button("Confirmar Palpite! ⚽"):
+                # Envia o nome por extenso do confronto para bater com o seu formulário manual
+                nome_confronto = dados_jogo['confronto']
                 placar_string = f"{gols_1} X {gols_2}"
                 
-                # ENVIA VIA POST DIRETO PARA A PLANILHA DO GOOGLE!
-                dados_envio = {ENTRY_NOME: nome, ENTRY_JOGO: jogo_selecionado, ENTRY_PALPITE: placar_string}
+                dados_envio = {ENTRY_NOME: nome, ENTRY_JOGO: nome_confronto, ENTRY_PALPITE: placar_string}
                 resposta = requests.post(URL_FORM_POST, data=dados_envio)
                 
                 if resposta.status_code == 200 or "formResponse" in resposta.url:
-                    st.success(f"🔥 Perfeito {nome}! Seu palpite ({placar_string}) foi salvo direto no Google Planilhas!")
-                    st.session_state.palpites = carregar_palpites() # Força a atualização da lista na tela
+                    st.success(f"🔥 Perfeito {nome}! Seu palpite ({placar_string}) foi salvo!")
+                    st.session_state.palpites = carregar_palpites()
                 else:
                     st.error("❌ Erro técnico ao salvar palpite no banco de dados do Google.")
 
@@ -188,27 +183,37 @@ with tab2:
     st.subheader("📊 Placar da Galera (Salvo na Planilha)")
     if st.session_state.palpites:
         df_palpites = pd.DataFrame(st.session_state.palpites)
-        df_palpites["Confronto"] = df_palpites["Jogo"].map(lambda x: st.session_state.jogos.get(x, {}).get("confronto", "Outras Rodadas"))
-        st.dataframe(df_palpites[["Participante", "Confronto", "Palpite"]], use_container_width=True, hide_index=True)
+        st.dataframe(df_palpites[["Participante", "Jogo", "Palpite"]], use_container_width=True, hide_index=True)
     else:
-        st.info("Nenhum palpite foi feito para as partidas vigentes até agora.")
+        st.info("Nenhum palpite válido encontrado.")
 
 # --- ABA 3: CLASSIFICAÇÃO GERAL ---
 with tab3:
     st.subheader("🏆 Classificação Geral da Família")
     pontos = {nome: 0 for nome in participantes_lista}
     
+    # Mapeamento reverso para aceitar tanto ID quanto nome do confronto
+    mapa_jogos = {}
+    for j_id, info in st.session_state.jogos.items():
+        mapa_jogos[j_id.upper().strip()] = info
+        mapa_jogos[info["confronto"].upper().strip()] = info
+
     for p in st.session_state.palpites:
-        jogo_id = p["Jogo"]
-        if jogo_id in st.session_state.jogos:
-            resultado_real = st.session_state.jogos[jogo_id]["resultado"]
-            if resultado_real and p["Participante"] in pontos: 
-                if p["Palpite"] == resultado_real:
+        jogo_chave = p["Jogo"].upper().strip()
+        if jogo_chave in mapa_jogos:
+            info_jogo = mapa_jogos[jogo_chave]
+            resultado_real = info_jogo["resultado"]
+            
+            if resultado_real and p["Participante"] in pontos:
+                res_real_limpo = str(resultado_real).upper().replace(" ", "")
+                palpite_limpo = p["Palpite"]
+                
+                if palpite_limpo == res_real_limpo:
                     pontos[p["Participante"]] += 10
                 else:
                     try:
-                        g_p1, g_p2 = map(int, p["Palpite"].split(" X "))
-                        g_r1, g_r2 = map(int, resultado_real.split(" X "))
+                        g_p1, g_p2 = map(int, palpite_limpo.split("X"))
+                        g_r1, g_r2 = map(int, res_real_limpo.split("X"))
                         if (g_p1 > g_p2 and g_r1 > g_r2) or (g_p1 < g_p2 and g_r1 < g_r2) or (g_p1 == g_p2 and g_r1 == g_r2):
                             pontos[p["Participante"]] += 4
                     except: pass
@@ -224,19 +229,22 @@ with tab4:
     if senha == "1234":
         st.success("🔓 Acesso Liberado!")
         
-        # Bloco secreto para inserção manual retroativa de jogos passados
         st.markdown("---")
         st.subheader("📝 Inserir Palpite Manual (Retroativo)")
         adm_nome = st.selectbox("Participante:", participantes_lista, key="adm_n")
-        adm_jogo = st.selectbox("Escolha o Jogo antigo:", list(st.session_state.jogos.keys()), format_func=lambda x: f"{x}: {st.session_state.jogos[x]['confronto']}", key="adm_j")
+        
+        # Admin escolhe o ID mas envia o Confronto por extenso para casar com a planilha
+        adm_jogo_id = st.selectbox("Escolha o Jogo antigo:", list(st.session_state.jogos.keys()), format_func=lambda x: f"{x}: {st.session_state.jogos[x]['confronto']}", key="adm_j")
         
         col_a1, col_a2 = st.columns(2)
         with col_a1: adm_g1 = st.number_input("Gols Time 1:", min_value=0, value=0, step=1, key="adm_g1")
         with col_a2: adm_g2 = st.number_input("Gols Time 2:", min_value=0, value=0, step=1, key="adm_g2")
         
         if st.button("Gravar na Planilha Manualmente 💾"):
+            confronto_texto = st.session_state.jogos[adm_jogo_id]['confronto']
             placar_manual = f"{adm_g1} X {adm_g2}"
-            dados_envio_manual = {ENTRY_NOME: adm_nome, ENTRY_JOGO: adm_jogo, ENTRY_PALPITE: placar_manual}
+            
+            dados_envio_manual = {ENTRY_NOME: adm_nome, ENTRY_JOGO: confronto_texto, ENTRY_PALPITE: placar_manual}
             requests.post(URL_FORM_POST, data=dados_envio_manual)
-            st.success(f"Palpite de {adm_nome} para o {adm_jogo} ({placar_manual}) forçado com sucesso!")
+            st.success(f"Palpite enviado!")
             st.session_state.palpites = carregar_palpites()
