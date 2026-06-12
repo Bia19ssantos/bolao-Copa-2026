@@ -135,7 +135,7 @@ st.markdown('<div class="header-bolao"><h1>🇧🇷 BOLÃO DA FAMÍLIA 🇧🇷<
 
 tab1, tab2, tab3, tab4 = st.tabs(["✍️ Dar Palpite", "📊 Ver Palpites da Rodada", "🏆 Classificação Geral", "⚙️ Admin"])
 
-# --- ABA 1: PALPITES (Com Bloqueio de Palpite Duplicado) ---
+# --- ABA 1: PALPITES (Filtrado apenas para os Jogos do Dia) ---
 with tab1:
     st.markdown("""
         <div class="caixa-legenda">
@@ -151,15 +151,24 @@ with tab1:
     st.subheader("✍️ Escolha um jogo para palpitar")
     nome = st.selectbox("Quem está jogando?", ["Selecione seu nome..."] + participantes_lista)
     
-    jogos_disponiveis = {k: v for k, v in st.session_state.jogos.items() if agora_br < v["data_completa"] and not v["encerrado"]}
+    # --- LÓGICA PARA FILTRAR APENAS JOGOS DE HOJE ---
+    # Pegamos o início do dia de hoje (00:00:00) e o fim do dia (23:59:59)
+    inicio_hoje = agora_br.replace(hour=0, minute=0, second=0, microsecond=0)
+    fim_hoje = agora_br.replace(hour=23, minute=59, second=59, microsecond=999999)
+    
+    # O jogo precisa estar dentro do dia de hoje, não pode estar encerrado e o participante só pode palpitar se o jogo ainda não começou
+    jogos_disponiveis = {
+        k: v for k, v in st.session_state.jogos.items() 
+        if inicio_hoje <= v["data_completa"] <= fim_hoje and not v["encerrado"] and agora_br < v["data_completa"]
+    }
     
     if not jogos_disponiveis:
-        st.info("📆 Não existem partidas abertas para receber palpites no momento!")
+        st.info("📆 Não existem partidas abertas acontecendo hoje!")
     else:
         jogo_selecionado = st.selectbox(
             "Escolha o jogo:", 
             list(jogos_disponiveis.keys()), 
-            format_func=lambda x: f"{jogos_disponiveis[x]['confronto']} ({jogos_disponiveis[x]['data_completa'].strftime('%d/%m - %H:%M')})"
+            format_func=lambda x: f"{jogos_disponiveis[x]['confronto']} ({jogos_disponiveis[x]['data_completa'].strftime('%H:%M')})"
         )
         
         if nome != "Selecione seu nome...":
@@ -180,7 +189,6 @@ with tab1:
                 st.warning(f"⚠️ **{nome}**, você já cadastrou um palpite para este jogo! Seu palpite salvo é: **{palpite_anterior}**.")
                 st.info("Não é permitido alterar o palpite após o envio.")
             else:
-                # Se não palpitou, libera os campos para preenchimento
                 col1, col2 = st.columns(2)
                 with col1:
                     gols_1 = st.number_input(f"Gols: {nome_confronto.split(' X ')[0]}", min_value=0, value=0, step=1, key="g1")
@@ -195,7 +203,6 @@ with tab1:
                     
                     if resposta.status_code == 200 or "formResponse" in resposta.url:
                         st.success(f"🔥 Perfeito {nome}! Seu palpite ({placar_string}) foi salvo!")
-                        # Recarrega os palpites na memória para atualizar o bloqueio imediatamente
                         st.session_state.palpites = carregar_palpites()
                         st.rerun()
                     else:
