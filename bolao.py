@@ -25,6 +25,19 @@ st.markdown("""
         .header-bolao h1 { color: #ffdf00 !important; margin: 0; font-size: 28px; }
         .header-bolao p { color: #ffffff; margin: 5px 0 0 0; font-weight: bold; font-size: 16px; }
         
+        /* Estilização da nova caixinha de Legenda de Pontos */
+        .caixa-legenda {
+            background-color: #1f232a;
+            border-left: 5px solid #009c3b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #3f4756;
+        }
+        .caixa-legenda h4 { color: #ffdf00 !important; margin-top: 0; margin-bottom: 8px; font-weight: bold; }
+        .caixa-legenda ul { margin: 0; padding-left: 20px; color: #ffffff !important; }
+        .caixa-legenda li { margin-bottom: 5px; color: #ffffff !important; }
+        
         h1, h2, h3, h4, h5, h6, span, p, label, .stMarkdown, [data-testid="stWidgetLabel"] p { 
             color: #ffffff !important; 
             font-family: 'Arial', sans-serif; 
@@ -53,12 +66,9 @@ st.markdown("""
 # 2. FUNÇÃO PARA LER OS JOGOS DA PLANILHA (Forçando tempo real)
 def carregar_jogos():
     try:
-        # Mudamos o link para exportação limpa e adicionamos um marcador aleatório para burlar o cache do Google
         import time
         url = LINK_DA_PLANILHA.replace('/edit?usp=sharing', f'/gviz/tq?tqx=out:csv&sheet=jogos&nocache={time.time()}')
         df = pd.read_csv(url)
-        
-        # Limpa espaços ocultos nos cabeçalhos
         df.columns = [str(col).strip() for col in df.columns]
         
         jogos_dict = {}
@@ -81,8 +91,7 @@ def carregar_jogos():
                 "dia": data_dia_jogo
             }
         return jogos_dict
-    except Exception as e:
-        # Plano B de segurança
+    except:
         return {
             "Jogo 3": {"confronto": "Canadá 🇨🇦 X 🇧🇦 Bósnia", "resultado": None, "encerrado": False, "data_completa": datetime(2026, 6, 12, 16, 0, tzinfo=fuso_br), "dia": "2026-06-12"},
             "Jogo 4": {"confronto": "Estados Unidos 🇺🇸 X 🇵🇾 Paraguai", "resultado": None, "encerrado": False, "data_completa": datetime(2026, 6, 12, 22, 0, tzinfo=fuso_br), "dia": "2026-06-12"},
@@ -97,7 +106,7 @@ if "palpites" not in st.session_state:
         {"Participante": "Balthazar", "Jogo": "Jogo 1", "Palpite": "2 X 1"},
         {"Participante": "Julien", "Jogo": "Jogo 1", "Palpite": "1 X 1"},
         {"Participante": "Liliane", "Jogo": "Jogo 1", "Palpite": "1 X 0"},
-        {"Participante": "Thiago", "Jogo": "Jogo 1", "Palpite": "0 X 1"}, 
+        {"Participante": "Thiago", "Jogo": "Jogo 1", "Palpite": "1 X 0"}, 
         {"Participante": "Thiago", "Jogo": "Jogo 2", "Palpite": "3 X 0"},
         {"Participante": "Samuel", "Jogo": "Jogo 3", "Palpite": "0 X 2"},
         {"Participante": "Julien", "Jogo": "Jogo 3", "Palpite": "3 X 0"},
@@ -114,12 +123,23 @@ tab1, tab2, tab3, tab4 = st.tabs(["✍️ Dar Palpite", "📊 Ver Palpites da Ro
 
 # --- ABA 1: PALPITES APENAS DO DIA ---
 with tab1:
+    # ADICIONADA A LEGENDA DOS PONTOS AQUI
+    st.markdown("""
+        <div class="caixa-legenda">
+            <h4>🎯 Sistema de Pontuação do Bolão:</h4>
+            <ul>
+                <li><strong>Placar Exato (Craque da Rodada):</strong> Ganha <strong>10 pontos</strong> (Ex: Palpitou 2x1 e o jogo terminou 2x1).</li>
+                <li><strong>Acertou a Tendência (Vencedor ou Empate):</strong> Ganha <strong>4 pontos</strong> (Ex: Palpitou 3x0, o time venceu por 1x0).</li>
+                <li><strong>Errou tudo:</strong> Ganha <strong>0 pontos</strong>.</li>
+            </ul>
+        </div>
+    """, unsafe_allow_html=True)
+
     st.subheader("✍️ Palpites para os jogos de Hoje")
     st.write(f"📅 Data de hoje no sistema: **{agora_br.strftime('%d/%m/%Y')}**")
     
     nome = st.selectbox("Quem está jogando?", ["Selecione seu nome..."] + participantes_lista)
     
-    # Filtra apenas partidas programadas para a data de hoje
     jogos_de_hoje = {k: v for k, v in st.session_state.jogos.items() if v['dia'] == hoje_str}
     
     if not jogos_de_hoje:
@@ -134,7 +154,6 @@ with tab1:
         if nome != "Selecione seu nome...":
             dados_jogo = jogos_de_hoje[jogo_selecionado]
             
-            # Bloqueia o palpite se o relógio passou do horário de início do jogo
             if agora_br > dados_jogo["data_completa"] or dados_jogo["encerrado"]:
                 st.error("❌ Bloqueado! Esta partida já começou ou foi encerrada. Não é mais possível registrar palpites para ela.")
             else:
