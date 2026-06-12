@@ -8,83 +8,88 @@ st.set_page_config(page_title="Bolão da Família - Rumo ao Hexa!", page_icon="�
 # Seu link real da planilha do Google já configurado:
 LINK_DA_PLANILHA = "https://docs.google.com/spreadsheets/d/1Z2I9Uu0wZvyDb4Fqyo-qgPKE8y4ga4279aj-VYfuXb0/edit?usp=sharing"
 
-# Injeção de CSS para unificar o padrão: Elementos escuros com letras brancas
+# Injeção de CSS para transformar o aplicativo INTEIRO em Tema Escuro Nativo
 st.markdown("""
     <style>
-        /* Fundo geral do app ligeiramente acinzentado para destacar os blocos pretos */
-        .stApp { background-color: #f4f4f9; }
-        h1, h2, h3 { color: #002776 !important; font-family: 'Arial Black', sans-serif; }
+        /* 1. FORÇAR FUNDO ESCURO EM TODO O APLICATIVO */
+        .stApp, [data-testid="stAppViewContainer"] { 
+            background-color: #0e1117 !important; 
+        }
         
-        /* Cabeçalho personalizado */
+        /* 2. CABEÇALHO PERSONALIZADO DA SELEÇÃO */
         .header-bolao {
             background: linear-gradient(135deg, #009c3b 0%, #002776 100%);
             color: #ffdf00 !important;
             text-align: center;
             padding: 25px;
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             margin-bottom: 25px;
         }
         .header-bolao h1 { color: #ffdf00 !important; margin: 0; font-size: 28px; }
         .header-bolao p { color: #ffffff; margin: 5px 0 0 0; font-weight: bold; font-size: 16px; }
 
-        /* Abas de navegação */
+        /* 3. TEXTOS, TÍTULOS E SUBTÍTULOS (Todos brancos e legíveis) */
+        h1, h2, h3, h4, h5, h6, span, p, label, .stMarkdown { 
+            color: #ffffff !important; 
+            font-family: 'Arial', sans-serif;
+        }
+        
+        /* Ajuste para sub-títulos menores não sumirem */
+        [data-testid="stWidgetLabel"] p {
+            color: #ffffff !important;
+            font-weight: bold !important;
+        }
+
+        /* 4. ABAS DE NAVEGAÇÃO */
         button[data-baseweb="tab"] {
             font-size: 14px !important;
             font-weight: bold !important;
-            color: #002776 !important;
+            color: #8a94a6 !important; /* Cinza claro quando não selecionada */
         }
         button[data-baseweb="tab"][aria-selected="true"] {
-            color: #009c3b !important;
-            border-bottom-color: #009c3b !important;
+            color: #ffdf00 !important; /* Amarelo ouro quando selecionada */
+            border-bottom-color: #ffdf00 !important;
         }
 
-        /* -------------------------------------------------------------
-           PADRÃO SEU: TABELAS, COMBOS E CAIXAS PRETAS COM LETRAS BRANCAS
-           ------------------------------------------------------------- */
-        
-        /* 1. CAIXAS DE SELEÇÃO (Combos) E INPUTS DE NÚMERO */
+        /* 5. CAIXAS DE SELEÇÃO (COMBOS), CAMPOS DE TEXTO E ENTRADAS NUMÉRICAS */
         div[data-baseweb="select"], div[data-baseweb="input"], input, .stNumberInput div {
-            background-color: #1e222b !important;
+            background-color: #1f232a !important;
             color: #ffffff !important;
+            border: 1px solid #3f4756 !important;
             border-radius: 8px;
         }
         
-        /* Forçar o texto dentro dos menus suspensos abertos a ficar BRANCO */
-        div[ul], li, span, p, div[data-attributed="true"] {
+        /* Forçar letras brancas dentro das listagens abertas (Combos) */
+        div[role="listbox"], li, div[role="option"] {
+            background-color: #1f232a !important;
             color: #ffffff !important;
-        }
-        
-        /* Ajuste específico para rótulos/labels fora das caixas não sumirem */
-        label p {
-            color: #111111 !important;
-            font-weight: bold !important;
         }
 
-        /* 2. TABELAS (Tanto st.dataframe quanto st.table) */
-        .stTable, table, data-grid-container, [data-testid="stTable"] {
-            background-color: #1e222b !important;
+        /* 6. ESTILO DE TODAS AS TABELAS (Palpites e Classificação Geral) */
+        .stTable, table, [data-testid="stTable"] {
+            background-color: #1f232a !important;
             border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 1px solid #3f4756 !important;
         }
         
-        /* Forçar todas as células, linhas e textos das tabelas a ficarem brancos */
         table tr, table td, th, td, tr, .stTable td, .stTable th {
-            background-color: #1e222b !important;
+            background-color: #1f232a !important;
             color: #ffffff !important;
             font-size: 15px !important;
-            border-bottom: 1px solid #2d323f !important;
+            border-bottom: 1px solid #3f4756 !important;
+            text-align: center !important;
         }
         
-        /* Cabeçalho das tabelas ligeiramente destacado em cinza escuro */
+        /* Cabeçalho superior das tabelas */
         th, table th {
             background-color: #11151c !important;
             font-weight: bold !important;
-            color: #ffdf00 !important; /* Destaque amarelo ouro para os títulos das colunas */
+            color: #ffdf00 !important; 
         }
 
-        /* Estilo dos botões de envio */
+        /* 7. BOTÃO DE CONFIRMAR PALPITE */
         div.stButton > button:first-child {
             background-color: #009c3b !important;
             color: #ffdf00 !important;
