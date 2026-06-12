@@ -135,7 +135,7 @@ st.markdown('<div class="header-bolao"><h1>🇧🇷 BOLÃO DA FAMÍLIA 🇧🇷<
 
 tab1, tab2, tab3, tab4 = st.tabs(["✍️ Dar Palpite", "📊 Ver Palpites da Rodada", "🏆 Classificação Geral", "⚙️ Admin"])
 
-# --- ABA 1: PALPITES ---
+# --- ABA 1: PALPITES (Com Bloqueio de Palpite Duplicado) ---
 with tab1:
     st.markdown("""
         <div class="caixa-legenda">
@@ -164,27 +164,44 @@ with tab1:
         
         if nome != "Selecione seu nome...":
             dados_jogo = jogos_disponiveis[jogo_selecionado]
+            nome_confronto = dados_jogo['confronto']
             
-            col1, col2 = st.columns(2)
-            with col1:
-                gols_1 = st.number_input(f"Gols: {dados_jogo['confronto'].split(' X ')[0]}", min_value=0, value=0, step=1, key="g1")
-            with col2:
-                gols_2 = st.number_input(f"Gols: {dados_jogo['confronto'].split(' X ')[1]}", min_value=0, value=0, step=1, key="g2")
-                
-            if st.button("Confirmar Palpite! ⚽"):
-                nome_confronto = dados_jogo['confronto']
-                placar_string = f"{gols_1} X {gols_2}"
-                
-                dados_envio = {ENTRY_NOME: nome, ENTRY_JOGO: nome_confronto, ENTRY_PALPITE: placar_string}
-                resposta = requests.post(URL_FORM_POST, data=dados_envio)
-                
-                if resposta.status_code == 200 or "formResponse" in resposta.url:
-                    st.success(f"🔥 Perfeito {nome}! Seu palpite ({placar_string}) foi salvo!")
-                    st.session_state.palpites = carregar_palpites()
-                else:
-                    st.error("❌ Erro técnico ao salvar palpite no banco de dados do Google.")
+            # --- VALIDAÇÃO SE O USUÁRIO JÁ PALPITOU ---
+            ja_palpitou = False
+            palpite_anterior = ""
+            
+            for p in st.session_state.palpites:
+                if p["Participante"].lower() == nome.lower() and p["Jogo"].upper().strip() == nome_confronto.upper().strip():
+                    ja_palpitou = True
+                    palpite_anterior = p["Palpite"]
+                    break
+            
+            if ja_palpitou:
+                st.warning(f"⚠️ **{nome}**, você já cadastrou um palpite para este jogo! Seu palpite salvo é: **{palpite_anterior}**.")
+                st.info("Não é permitido alterar o palpite após o envio.")
+            else:
+                # Se não palpitou, libera os campos para preenchimento
+                col1, col2 = st.columns(2)
+                with col1:
+                    gols_1 = st.number_input(f"Gols: {nome_confronto.split(' X ')[0]}", min_value=0, value=0, step=1, key="g1")
+                with col2:
+                    gols_2 = st.number_input(f"Gols: {nome_confronto.split(' X ')[1]}", min_value=0, value=0, step=1, key="g2")
+                    
+                if st.button("Confirmar Palpite! ⚽"):
+                    placar_string = f"{gols_1} X {gols_2}"
+                    
+                    dados_envio = {ENTRY_NOME: nome, ENTRY_JOGO: nome_confronto, ENTRY_PALPITE: placar_string}
+                    resposta = requests.post(URL_FORM_POST, data=dados_envio)
+                    
+                    if resposta.status_code == 200 or "formResponse" in resposta.url:
+                        st.success(f"🔥 Perfeito {nome}! Seu palpite ({placar_string}) foi salvo!")
+                        # Recarrega os palpites na memória para atualizar o bloqueio imediatamente
+                        st.session_state.palpites = carregar_palpites()
+                        st.rerun()
+                    else:
+                        st.error("❌ Erro técnico ao salvar palpite no banco de dados do Google.")
 
-# --- ABA 2: VER PALPITES DA RODADA (Versão Corrigida) ---
+# --- ABA 2: VER PALPITES DA RODADA ---
 with tab2:
     st.subheader("🔍 Buscar Palpites da Galera")
     
