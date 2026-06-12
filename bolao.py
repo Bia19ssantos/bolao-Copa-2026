@@ -10,9 +10,10 @@ LINK_DA_PLANILHA = "https://docs.google.com/spreadsheets/d/1Z2I9Uu0wZvyDb4Fqyo-q
 
 # ==================== ATENÇÃO: ATUALIZE ESSES NÚMEROS SE SEU NOVO FORMS NÃO SALVAR ====================
 URL_FORM_POST = "https://docs.google.com/forms/d/e/1FAIpQLSe-pFE2N7hUNuJZf8rWXZMrlVkeDULySNF1LSQDUTNepOEJqw/formResponse"
-ENTRY_NOME = "entry.1221199580"    
-ENTRY_JOGO = "entry.1843232675"    
-ENTRY_PALPITE = "entry.880496180"   
+# ATUALIZADO COM OS IDs CORRETOS
+ENTRY_NOME = "entry.155949992"    
+ENTRY_JOGO = "entry.1025675970"    
+ENTRY_PALPITE = "entry.626328654"
 # ======================================================================================================
 
 # Define o fuso horário de Brasília (UTC-3) nativamente
