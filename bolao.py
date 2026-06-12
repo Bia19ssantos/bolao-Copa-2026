@@ -15,6 +15,7 @@ ENTRY_JOGO = "entry.1843232675"
 ENTRY_PALPITE = "entry.880496180"   
 # ======================================================================================================
 
+# Define o fuso horário de Brasília (UTC-3) nativamente
 fuso_br = timezone(timedelta(hours=-3))
 agora_br = datetime.now(fuso_br)
 
@@ -205,7 +206,6 @@ with tab3:
             info_jogo = mapa_jogos[jogo_chave]
             resultado_real = info_jogo["resultado"]
             
-            # Só calcula pontuação se o resultado real existir e não for nulo
             if resultado_real and p["Participante"] in pontos:
                 res_real_limpo = str(resultado_real).upper().replace(" ", "")
                 palpite_limpo = p["Palpite"]
