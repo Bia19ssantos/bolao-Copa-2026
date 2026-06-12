@@ -5,7 +5,7 @@ from datetime import datetime
 # 1. CONFIGURAÇÃO DA PÁGINA (Tema Verde e Amarelo via CSS)
 st.set_page_config(page_title="Bolão da Família - Rumo ao Hexa!", page_icon="🇧🇷", layout="centered")
 
-# Injeção de CSS para deixar o app com a cara da Seleção e abas visíveis
+# Injeção de CSS para deixar o app com a cara da Seleção e tabelas visíveis
 st.markdown("""
     <style>
         /* Fundo e textos gerais */
@@ -37,6 +37,16 @@ st.markdown("""
             border-bottom-color: #009c3b !important;
         }
 
+        /* CORREÇÃO DA TABELA: Força o texto a ficar escuro e visível */
+        table, th, td, tr, p, span {
+            color: #111111 !important; 
+            font-size: 15px !important;
+        }
+        th {
+            font-weight: bold !important;
+            background-color: #e2e8f0 !important;
+        }
+
         /* Estilo dos botões de envio */
         div.stButton > button:first-child {
             background-color: #009c3b !important;
@@ -60,7 +70,7 @@ st.markdown("""
 if "jogos" not in st.session_state:
     st.session_state.jogos = {
         "Jogo 1": {"confronto": "México 🇲🇽 X 🇿🇦 África do Sul", "limite": datetime(2026, 6, 11, 12, 0), "resultado": "2 X 0", "encerrado": True},
-        "Jogo 2": {"confronto": "Coreia do Sul 🇰🇷 X 🇨🇿 Rep. Tcheca", "limite": datetime(2026, 6, 11, 15, 0), "resultado": "3 X 0", "encerrado": True},
+        "Jogo 2": {"confronto": "Coreia do Sul 🇰🇷 X 🇨🇿 Rep. Tcheca", "limite": datetime(2026, 6, 11, 15, 0), "resultado": "1 X 0", "encerrado": True},
         "Jogo 3": {"confronto": "Canadá 🇨🇦 X 🇧🇦 Bósnia", "limite": datetime(2026, 6, 12, 16, 0), "resultado": None, "encerrado": False},
         "Jogo 4": {"confronto": "Brasil 🇧🇷 X 🇭🇷 Croácia (Estreia rumo ao Hexa! ⭐)", "limite": datetime(2026, 6, 13, 16, 0), "resultado": None, "encerrado": False},
     }
