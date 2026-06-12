@@ -184,18 +184,15 @@ with tab1:
                 else:
                     st.error("❌ Erro técnico ao salvar palpite no banco de dados do Google.")
 
-# --- ABA 2: PALPITES DA GALERA ---
-# --- ABA 2: VER PALPITES DA RODADA (Com Filtro e Ícones de Status) ---
+# --- ABA 2: VER PALPITES DA RODADA (Versão Corrigida) ---
 with tab2:
     st.subheader("🔍 Buscar Palpites da Galera")
     
-    # 1. Filtro por Nome do Participante
-    # Criamos uma lista com todos para facilitar a busca, além da opção de ver "Todos"
+    # 1. Filtro por Nome do Participante (Corrigido para evitar NameError)
     opcoes_filtro = ["Todos"] + list(participantes_lista)
-    busca_nome = st.selectbox("Filtrar por participante:", opciones_filtro)
+    busca_nome = st.selectbox("Filtrar por participante:", opcoes_filtro)
     
     # Criamos um mapa dos resultados dos jogos para conseguir comparar linha por linha
-    # Convertemos para maiúsculas e removemos espaços para evitar erros de digitação
     mapa_resultados = {}
     for j_id, info in st.session_state.jogos.items():
         chave_jogo = str(info["confronto"]).upper().strip()
