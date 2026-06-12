@@ -109,8 +109,10 @@ def carregar_palpites():
         df = pd.read_csv(url)
         df.columns = [str(col).strip() for col in df.columns]
         
+        # Limpeza rigorosa
         df = df.dropna(subset=['Participante', 'Jogo', 'Palpite'])
-        df = df.drop_duplicates(subset=['Participante', 'Jogo'], keep='last')
+        # Mantém apenas a última entrada de cada jogo para cada participante
+        df = df.sort_values(by=['Participante', 'Jogo']).drop_duplicates(subset=['Participante', 'Jogo'], keep='last')
         
         lista_palpites = []
         for _, row in df.iterrows():
