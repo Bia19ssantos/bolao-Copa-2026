@@ -8,10 +8,10 @@ st.set_page_config(page_title="Bolão da Família - Rumo ao Hexa!", page_icon="�
 # Seu link real da planilha do Google já configurado:
 LINK_DA_PLANILHA = "https://docs.google.com/spreadsheets/d/1Z2I9Uu0wZvyDb4Fqyo-qgPKE8y4ga4279aj-VYfuXb0/edit?usp=sharing"
 
-# Injeção de CSS para deixar o app lindo e com textos 100% visíveis
+# Injeção de CSS para unificar o padrão: Elementos escuros com letras brancas
 st.markdown("""
     <style>
-        /* Fundo e textos gerais */
+        /* Fundo geral do app ligeiramente acinzentado para destacar os blocos pretos */
         .stApp { background-color: #f4f4f9; }
         h1, h2, h3 { color: #002776 !important; font-family: 'Arial Black', sans-serif; }
         
@@ -28,26 +28,60 @@ st.markdown("""
         .header-bolao h1 { color: #ffdf00 !important; margin: 0; font-size: 28px; }
         .header-bolao p { color: #ffffff; margin: 5px 0 0 0; font-weight: bold; font-size: 16px; }
 
-        /* Forçar abas a mostrarem o texto completo e centralizado */
+        /* Abas de navegação */
         button[data-baseweb="tab"] {
             font-size: 14px !important;
             font-weight: bold !important;
             color: #002776 !important;
-            white-space: nowrap !important;
         }
         button[data-baseweb="tab"][aria-selected="true"] {
             color: #009c3b !important;
             border-bottom-color: #009c3b !important;
         }
 
-        /* CORREÇÃO DO TEXTO APAGADO: Força todas as linhas da tabela a ficarem bem escuras */
-        table, th, td, tr, p, span, div {
-            color: #111111 !important; 
-            font-size: 15px !important;
+        /* -------------------------------------------------------------
+           PADRÃO SEU: TABELAS, COMBOS E CAIXAS PRETAS COM LETRAS BRANCAS
+           ------------------------------------------------------------- */
+        
+        /* 1. CAIXAS DE SELEÇÃO (Combos) E INPUTS DE NÚMERO */
+        div[data-baseweb="select"], div[data-baseweb="input"], input, .stNumberInput div {
+            background-color: #1e222b !important;
+            color: #ffffff !important;
+            border-radius: 8px;
         }
-        th {
+        
+        /* Forçar o texto dentro dos menus suspensos abertos a ficar BRANCO */
+        div[ul], li, span, p, div[data-attributed="true"] {
+            color: #ffffff !important;
+        }
+        
+        /* Ajuste específico para rótulos/labels fora das caixas não sumirem */
+        label p {
+            color: #111111 !important;
             font-weight: bold !important;
-            background-color: #e2e8f0 !important;
+        }
+
+        /* 2. TABELAS (Tanto st.dataframe quanto st.table) */
+        .stTable, table, data-grid-container, [data-testid="stTable"] {
+            background-color: #1e222b !important;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* Forçar todas as células, linhas e textos das tabelas a ficarem brancos */
+        table tr, table td, th, td, tr, .stTable td, .stTable th {
+            background-color: #1e222b !important;
+            color: #ffffff !important;
+            font-size: 15px !important;
+            border-bottom: 1px solid #2d323f !important;
+        }
+        
+        /* Cabeçalho das tabelas ligeiramente destacado em cinza escuro */
+        th, table th {
+            background-color: #11151c !important;
+            font-weight: bold !important;
+            color: #ffdf00 !important; /* Destaque amarelo ouro para os títulos das colunas */
         }
 
         /* Estilo dos botões de envio */
