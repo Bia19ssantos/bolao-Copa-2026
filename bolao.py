@@ -81,7 +81,10 @@ def carregar_jogos():
             if pd.isna(row['Confronto']) or pd.isna(row['Data']):
                 continue
                 
-            res = None if pd.isna(row['Resultado']) or str(row['Resultado']).strip() == '-' else str(row['Resultado']).strip()
+            res = str(row['Resultado']).strip().upper().replace(" ", "") if not pd.isna(row['Resultado']) else ""
+            if res == "" or res == "-" or "NAN" in res:
+                res = None
+                
             enc = True if str(row['Encerrado']).lower().strip() == 'true' else False
             
             data_hora_jogo = datetime.strptime(str(row['Data']).strip(), "%Y-%m-%d %H:%M")
@@ -113,7 +116,7 @@ def carregar_palpites():
             lista_palpites.append({
                 "Participante": str(row['Participante']).strip(),
                 "Jogo": str(row['Jogo']).strip(),
-                "Palpite": str(row['Palpite']).strip().upper().replace(" ", "") # Remove espaços ("0X1")
+                "Palpite": str(row['Palpite']).strip().upper().replace(" ", "")
             })
         return lista_palpites
     except:
@@ -165,7 +168,6 @@ with tab1:
                 gols_2 = st.number_input(f"Gols: {dados_jogo['confronto'].split(' X ')[1]}", min_value=0, value=0, step=1, key="g2")
                 
             if st.button("Confirmar Palpite! ⚽"):
-                # Envia o nome por extenso do confronto para bater com o seu formulário manual
                 nome_confronto = dados_jogo['confronto']
                 placar_string = f"{gols_1} X {gols_2}"
                 
@@ -192,7 +194,6 @@ with tab3:
     st.subheader("🏆 Classificação Geral da Família")
     pontos = {nome: 0 for nome in participantes_lista}
     
-    # Mapeamento reverso para aceitar tanto ID quanto nome do confronto
     mapa_jogos = {}
     for j_id, info in st.session_state.jogos.items():
         mapa_jogos[j_id.upper().strip()] = info
@@ -204,6 +205,7 @@ with tab3:
             info_jogo = mapa_jogos[jogo_chave]
             resultado_real = info_jogo["resultado"]
             
+            # Só calcula pontuação se o resultado real existir e não for nulo
             if resultado_real and p["Participante"] in pontos:
                 res_real_limpo = str(resultado_real).upper().replace(" ", "")
                 palpite_limpo = p["Palpite"]
@@ -232,8 +234,6 @@ with tab4:
         st.markdown("---")
         st.subheader("📝 Inserir Palpite Manual (Retroativo)")
         adm_nome = st.selectbox("Participante:", participantes_lista, key="adm_n")
-        
-        # Admin escolhe o ID mas envia o Confronto por extenso para casar com a planilha
         adm_jogo_id = st.selectbox("Escolha o Jogo antigo:", list(st.session_state.jogos.keys()), format_func=lambda x: f"{x}: {st.session_state.jogos[x]['confronto']}", key="adm_j")
         
         col_a1, col_a2 = st.columns(2)
