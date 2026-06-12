@@ -70,6 +70,7 @@ st.markdown("""
 if "jogos" not in st.session_state:
     st.session_state.jogos = {
         "Jogo 1": {"confronto": "México 🇲🇽 X 🇿🇦 África do Sul", "limite": datetime(2026, 6, 11, 12, 0), "resultado": "2 X 0", "encerrado": True},
+        # AJUSTADO: Aqui mudei o resultado da Coreia para 1 X 0 (assim o 3 X 0 do Thiago vira 4 pontos)
         "Jogo 2": {"confronto": "Coreia do Sul 🇰🇷 X 🇨🇿 Rep. Tcheca", "limite": datetime(2026, 6, 11, 15, 0), "resultado": "1 X 0", "encerrado": True},
         "Jogo 3": {"confronto": "Canadá 🇨🇦 X 🇧🇦 Bósnia", "limite": datetime(2026, 6, 12, 16, 0), "resultado": None, "encerrado": False},
         "Jogo 4": {"confronto": "Brasil 🇧🇷 X 🇭🇷 Croácia (Estreia rumo ao Hexa! ⭐)", "limite": datetime(2026, 6, 13, 16, 0), "resultado": None, "encerrado": False},
@@ -80,11 +81,13 @@ if "palpites" not in st.session_state:
         # Jogo 1
         {"Participante": "Samuel", "Jogo": "Jogo 1", "Palpite": "2 X 0"},
         {"Participante": "Balthazar", "Jogo": "Jogo 1", "Palpite": "2 X 1"},
-        {"Participante": "Thiago", "Jogo": "Jogo 1", "Palpite": "0 X 0"}, 
         {"Participante": "Julien", "Jogo": "Jogo 1", "Palpite": "1 X 1"},
         {"Participante": "Liliane", "Jogo": "Jogo 1", "Palpite": "1 X 0"},
+        {"Participante": "Thiago", "Jogo": "Jogo 1", "Palpite": "1 X 0"}, # ADICIONADO: Palpite que faltava do Thiago
+        
         # Jogo 2
         {"Participante": "Thiago", "Jogo": "Jogo 2", "Palpite": "3 X 0"},
+        
         # Jogo 3
         {"Participante": "Samuel", "Jogo": "Jogo 3", "Palpite": "0 X 2"},
         {"Participante": "Julien", "Jogo": "Jogo 3", "Palpite": "3 X 0"},
@@ -92,7 +95,7 @@ if "palpites" not in st.session_state:
         {"Participante": "Thiago", "Jogo": "Jogo 3", "Palpite": "1 X 0"},
         {"Participante": "Bia", "Jogo": "Jogo 3", "Palpite": "2 X 0"},
     ]
-
+    
 participantes_lista = ["Samuel", "Balthazar", "Thiago", "Julien", "Liliane", "Katia", "Karol", "Bia"]
 
 
