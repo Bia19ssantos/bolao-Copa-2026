@@ -198,15 +198,17 @@ with tab3:
     st.subheader("🏆 Classificação Geral da Família")
     pontos = {nome: 0 for nome in participantes_lista}
     
-    # Criamos um dicionário onde a chave é o nome do jogo LIMPO
+    # Criamos um mapa de resultados limpos
     mapa_resultados = {}
     for j_id, info in st.session_state.jogos.items():
         if info["resultado"]:
             chave = str(info["confronto"]).upper().strip()
+            # Removemos todos os espaços do resultado (ex: "2 X 0" vira "2X0")
             mapa_resultados[chave] = str(info["resultado"]).upper().replace(" ", "")
 
     for p in st.session_state.palpites:
         chave_palpite = str(p["Jogo"]).upper().strip()
+        # Removemos todos os espaços do palpite do usuário
         palpite_limpo = str(p["Palpite"]).upper().replace(" ", "")
         
         if chave_palpite in mapa_resultados:
@@ -218,9 +220,11 @@ with tab3:
             else:
                 # 2. Acertou a tendência (4 pontos)
                 try:
+                    # Tenta dividir "2X0" em gols
                     g_p1, g_p2 = map(int, palpite_limpo.split("X"))
                     g_r1, g_r2 = map(int, res_real.split("X"))
                     
+                    # Verifica vencedor (1=Time1, 2=Time2, 0=Empate)
                     vencedor_p = 1 if g_p1 > g_p2 else (2 if g_p2 > g_p1 else 0)
                     vencedor_r = 1 if g_r1 > g_r2 else (2 if g_r2 > g_r1 else 0)
                     
@@ -228,6 +232,7 @@ with tab3:
                         pontos[p["Participante"]] += 4
                 except: pass
                     
+    # Exibe ranking
     df_ranking = pd.DataFrame(list(pontos.items()), columns=["Participante", "Pontos"]).sort_values(by="Pontos", ascending=False)
     st.table(df_ranking)
 
