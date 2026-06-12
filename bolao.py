@@ -83,7 +83,7 @@ if "palpites" not in st.session_state:
         {"Participante": "Balthazar", "Jogo": "Jogo 1", "Palpite": "2 X 1"},
         {"Participante": "Julien", "Jogo": "Jogo 1", "Palpite": "1 X 1"},
         {"Participante": "Liliane", "Jogo": "Jogo 1", "Palpite": "1 X 0"},
-        {"Participante": "Thiago", "Jogo": "Jogo 1", "Palpite": "1 X 0"}, # ADICIONADO: Palpite que faltava do Thiago
+        {"Participante": "Thiago", "Jogo": "Jogo 1", "Palpite": "0 X 1"}, # ADICIONADO: Palpite que faltava do Thiago
         
         # Jogo 2
         {"Participante": "Thiago", "Jogo": "Jogo 2", "Palpite": "3 X 0"},
