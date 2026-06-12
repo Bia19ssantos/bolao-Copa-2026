@@ -180,7 +180,7 @@ with tab1:
 
 # --- ABA 2: PALPITES DA GALERA ---
 with tab2:
-    st.subheader("📊 Placar da Galera (Salvo na Planilha)")
+    st.subheader("📊 Placar da Galera")
     if st.session_state.palpites:
         df_palpites = pd.DataFrame(st.session_state.palpites)
         st.dataframe(df_palpites[["Participante", "Jogo", "Palpite"]], use_container_width=True, hide_index=True)
