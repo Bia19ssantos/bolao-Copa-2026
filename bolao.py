@@ -185,13 +185,86 @@ with tab1:
                     st.error("❌ Erro técnico ao salvar palpite no banco de dados do Google.")
 
 # --- ABA 2: PALPITES DA GALERA ---
+# --- ABA 2: VER PALPITES DA RODADA (Com Filtro e Ícones de Status) ---
 with tab2:
-    st.subheader("📊 Placar da Galera")
-    if st.session_state.palpites:
-        df_palpites = pd.DataFrame(st.session_state.palpites)
-        st.dataframe(df_palpites[["Participante", "Jogo", "Palpite"]], use_container_width=True, hide_index=True)
+    st.subheader("🔍 Buscar Palpites da Galera")
+    
+    # 1. Filtro por Nome do Participante
+    # Criamos uma lista com todos para facilitar a busca, além da opção de ver "Todos"
+    opcoes_filtro = ["Todos"] + list(participantes_lista)
+    busca_nome = st.selectbox("Filtrar por participante:", opciones_filtro)
+    
+    # Criamos um mapa dos resultados dos jogos para conseguir comparar linha por linha
+    # Convertemos para maiúsculas e removemos espaços para evitar erros de digitação
+    mapa_resultados = {}
+    for j_id, info in st.session_state.jogos.items():
+        chave_jogo = str(info["confronto"]).upper().strip()
+        if info["resultado"]:
+            mapa_resultados[chave_jogo] = {
+                "placar": str(info["resultado"]).upper().replace(" ", ""),
+                "encerrado": info.get("encerrado", False)
+            }
+        else:
+            mapa_resultados[chave_jogo] = {
+                "placar": None,
+                "encerrado": info.get("encerrado", False)
+            }
+
+    # 2. Filtrar a lista de palpites com base na escolha do usuário
+    palpites_filtrados = []
+    for p in st.session_state.palpites:
+        if busca_nome == "Todos" or p["Participante"].lower() == busca_nome.lower():
+            palpites_filtrados.append(p)
+            
+    # 3. Processar e exibir os palpites com os ícones de acerto
+    if len(palpites_filtrados) > 0:
+        dados_tabela = []
+        
+        for p in palpites_filtrados:
+            nome_jogo = str(p["Jogo"]).upper().strip()
+            palpite_limpo = str(p["Palpite"]).upper().replace(" ", "")
+            
+            # Ícone padrão caso o jogo ainda não tenha acontecido ou não tenha resultado
+            status_icone = "⏳ Aguardando Jogo"
+            
+            # Se o jogo já tem resultado na planilha, calculamos o ícone
+            if nome_jogo in mapa_resultados and mapa_resultados[nome_jogo]["placar"]:
+                res_real = mapa_resultados[nome_jogo]["placar"]
+                
+                # Cenário 1: Acertou o Placar Exato (🟢 Ganhador de 10 pontos)
+                if palpite_limpo == res_real:
+                    status_icone = "🟢 Placar Exato (+10 pts)"
+                else:
+                    # Cenário 2: Verificar se acertou a tendência (🟡 Vencedor ou Empate)
+                    try:
+                        g_p1, g_p2 = map(int, palpite_limpo.split("X"))
+                        g_r1, g_r2 = map(int, res_real.split("X"))
+                        
+                        vencedor_p = 1 if g_p1 > g_p2 else (2 if g_p2 > g_p1 else 0)
+                        vencedor_r = 1 if g_r1 > g_r2 else (2 if g_r2 > g_r1 else 0)
+                        
+                        if vencedor_p == vencedor_r:
+                            status_icone = "🟡 Acertou o Vencedor/Empate (+4 pts)"
+                        else:
+                            # Cenário 3: Errou tudo (🔴 0 pontos)
+                            status_icone = "🔴 Errou o palpite (0 pts)"
+                    except:
+                        status_icone = "❌ Erro no formato do palpite"
+            
+            # Monta a linha bonita para exibir na tela
+            dados_tabela.append({
+                "Participante": p["Participante"],
+                "Jogo": p["Jogo"],
+                "Palpite": p["Palpite"],
+                "Desempenho": status_icone
+            })
+            
+        # Transforma em DataFrame e exibe como uma tabela limpa
+        df_palpites = pd.DataFrame(dados_tabela)
+        st.dataframe(df_palpites, use_container_width=True, hide_index=True)
+        
     else:
-        st.info("Nenhum palpite válido encontrado.")
+        st.warning("Nenhum palpite encontrado para os critérios selecionados.")
 
 # --- ABA 3: CLASSIFICAÇÃO GERAL ---
 with tab3:
