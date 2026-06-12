@@ -50,7 +50,7 @@ st.markdown("""
             font-weight: bold;
         }
     </style>
-""", unsafe_scale=True, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 
 # 2. BANCO DE DADOS INICIAL
