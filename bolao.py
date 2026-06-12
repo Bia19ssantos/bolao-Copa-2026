@@ -198,34 +198,38 @@ with tab3:
     st.subheader("🏆 Classificação Geral da Família")
     pontos = {nome: 0 for nome in participantes_lista}
     
-    mapa_jogos = {}
+    # Criamos um dicionário onde a chave é o nome do jogo LIMPO
+    mapa_resultados = {}
     for j_id, info in st.session_state.jogos.items():
-        mapa_jogos[j_id.upper().strip()] = info
-        mapa_jogos[info["confronto"].upper().strip()] = info
+        if info["resultado"]:
+            chave = str(info["confronto"]).upper().strip()
+            mapa_resultados[chave] = str(info["resultado"]).upper().replace(" ", "")
 
     for p in st.session_state.palpites:
-        jogo_chave = p["Jogo"].upper().strip()
-        if jogo_chave in mapa_jogos:
-            info_jogo = mapa_jogos[jogo_chave]
-            resultado_real = info_jogo["resultado"]
+        chave_palpite = str(p["Jogo"]).upper().strip()
+        palpite_limpo = str(p["Palpite"]).upper().replace(" ", "")
+        
+        if chave_palpite in mapa_resultados:
+            res_real = mapa_resultados[chave_palpite]
             
-            if resultado_real and p["Participante"] in pontos:
-                res_real_limpo = str(resultado_real).upper().replace(" ", "")
-                palpite_limpo = p["Palpite"]
-                
-                if palpite_limpo == res_real_limpo:
-                    pontos[p["Participante"]] += 10
-                else:
-                    try:
-                        g_p1, g_p2 = map(int, palpite_limpo.split("X"))
-                        g_r1, g_r2 = map(int, res_real_limpo.split("X"))
-                        if (g_p1 > g_p2 and g_r1 > g_r2) or (g_p1 < g_p2 and g_r1 < g_r2) or (g_p1 == g_p2 and g_r1 == g_r2):
-                            pontos[p["Participante"]] += 4
-                    except: pass
+            # 1. Placar Exato (10 pontos)
+            if palpite_limpo == res_real:
+                pontos[p["Participante"]] += 10
+            else:
+                # 2. Acertou a tendência (4 pontos)
+                try:
+                    g_p1, g_p2 = map(int, palpite_limpo.split("X"))
+                    g_r1, g_r2 = map(int, res_real.split("X"))
+                    
+                    vencedor_p = 1 if g_p1 > g_p2 else (2 if g_p2 > g_p1 else 0)
+                    vencedor_r = 1 if g_r1 > g_r2 else (2 if g_r2 > g_r1 else 0)
+                    
+                    if vencedor_p == vencedor_r:
+                        pontos[p["Participante"]] += 4
+                except: pass
                     
     df_ranking = pd.DataFrame(list(pontos.items()), columns=["Participante", "Pontos"]).sort_values(by="Pontos", ascending=False)
-    ranking_visual = [{"Posição": f"{i+1}º 🏅" if i<3 else f"{i+1}º ", "Nome": r.Participante, "Total Pontos": f"{r.Pontos} pts"} for i, r in enumerate(df_ranking.itertuples())]
-    st.table(pd.DataFrame(ranking_visual))
+    st.table(df_ranking)
 
 # --- ABA 4: ADMIN ---
 with tab4:
