@@ -151,14 +151,19 @@ with tab1:
     st.subheader("✍️ Escolha um jogo para palpitar")
     nome = st.selectbox("Quem está jogando?", ["Selecione seu nome..."] + participantes_lista)
     
-    # --- LÓGICA PARA FILTRAR APENAS JOGOS DE HOJE ---
-    inicio_hoje = agora_br.replace(hour=0, minute=0, second=0, microsecond=0)
-    #---- fim_hoje = agora_br.replace(hour=23, minute=59, second=59, microsecond=999999) ---
+    # --- LÓGICA: Jogos de hoje + jogos até as 03:00 da manhã do dia seguinte ---
+    # Isso cobre o dia atual e a madrugada imediata
+    agora_br = datetime.now(fuso_br)
     limite_tempo = timedelta(minutes=10)
+    
+    # Define o limite de busca até as 03:00 da manhã do próximo dia
+    fim_madrugada = (agora_br + timedelta(days=1)).replace(hour=1, minute=30, second=0, microsecond=0)
+    inicio_hoje = agora_br.replace(hour=0, minute=0, second=0, microsecond=0)
     
     jogos_disponiveis = {
         k: v for k, v in st.session_state.jogos.items() 
-        if not v["encerrado"] 
+        if inicio_hoje <= v["data_completa"] <= fim_madrugada 
+        and not v["encerrado"] 
         and agora_br < (v["data_completa"] - limite_tempo)
     }
     
