@@ -158,8 +158,7 @@ with tab1:
     
     jogos_disponiveis = {
         k: v for k, v in st.session_state.jogos.items() 
-        if inicio_hoje <= v["data_completa"] <= fim_hoje 
-        and not v["encerrado"] 
+        if not v["encerrado"] 
         and agora_br < (v["data_completa"] - limite_tempo)
     }
     
