@@ -158,7 +158,7 @@ with tab1:
     
     # Define o limite de busca até as 03:00 da manhã do próximo dia
     fim_madrugada = (agora_br + timedelta(days=1)).replace(hour=1, minute=30, second=0, microsecond=0)
-    inicio_hoje = agora_br.replace(hour=0, minute=0, second=0, microsecond=0)
+    inicio_hoje = agora_br.replace(hour=23, minute=57, second=0, microsecond=0)
     
     jogos_disponiveis = {
         k: v for k, v in st.session_state.jogos.items() 
