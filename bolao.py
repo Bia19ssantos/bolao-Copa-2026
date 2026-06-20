@@ -165,7 +165,6 @@ with tab1:
         if inicio_busca <= v["data_completa"] <= fim_busca 
         and not v["encerrado"] 
         and agora_br < (v["data_completa"] - limite_tempo)
-    }agora_br < (v["data_completa"] - limite_tempo)
     }
     
     if not jogos_disponiveis:
