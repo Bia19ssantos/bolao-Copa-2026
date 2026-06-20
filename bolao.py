@@ -152,12 +152,11 @@ with tab1:
     nome = st.selectbox("Quem está jogando?", ["Selecione seu nome..."] + participantes_lista)
     
     # --- LÓGICA PARA FILTRAR APENAS JOGOS DE HOJE ---
-  
     inicio_hoje = agora_br.replace(hour=0, minute=0, second=0, microsecond=0)
     fim_hoje = agora_br.replace(hour=23, minute=59, second=59, microsecond=999999)
     limite_tempo = timedelta(minutes=10)
     
-  jogos_disponiveis = {
+    jogos_disponiveis = {
         k: v for k, v in st.session_state.jogos.items() 
         if inicio_hoje <= v["data_completa"] <= fim_hoje 
         and not v["encerrado"] 
