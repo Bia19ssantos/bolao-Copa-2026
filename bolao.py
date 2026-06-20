@@ -152,19 +152,20 @@ with tab1:
     nome = st.selectbox("Quem está jogando?", ["Selecione seu nome..."] + participantes_lista)
     
     # --- LÓGICA: Jogos de hoje + jogos até as 03:00 da manhã do dia seguinte ---
-    # Isso cobre o dia atual e a madrugada imediata
     agora_br = datetime.now(fuso_br)
     limite_tempo = timedelta(minutes=10)
     
-    # Define o limite de busca até as 03:00 da manhã do próximo dia
-    fim_madrugada = (agora_br + timedelta(days=1)).replace(hour=1, minute=30, second=0, microsecond=0)
-    inicio_hoje = agora_br.replace(hour=23, minute=57, second=0, microsecond=0)
+    # Define o início como "ontem às 21:00" ou "hoje às 00:00" para garantir segurança
+    # e o fim como "amanhã às 03:00"
+    inicio_busca = (agora_br - timedelta(hours=3)).replace(hour=0, minute=0, second=0, microsecond=0)
+    fim_busca = (agora_br + timedelta(days=1)).replace(hour=3, minute=0, second=0, microsecond=0)
     
     jogos_disponiveis = {
         k: v for k, v in st.session_state.jogos.items() 
-        if inicio_hoje <= v["data_completa"] <= fim_madrugada 
+        if inicio_busca <= v["data_completa"] <= fim_busca 
         and not v["encerrado"] 
         and agora_br < (v["data_completa"] - limite_tempo)
+    }agora_br < (v["data_completa"] - limite_tempo)
     }
     
     if not jogos_disponiveis:
